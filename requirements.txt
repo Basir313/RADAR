@@ -1,0 +1,10 @@
+asttokens==3.0.0
+certifi==2025.7.14
+colorama==0.4.6
+elastic-transport==8.17.1
+elasticsearch==8.5.1
+executing==2.2.0
+hdbcli==2.25.29
+icecream==2.1.5
+Pygments==2.19.2
+urllib3==2.5.0
