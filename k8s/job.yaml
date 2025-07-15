@@ -1,25 +1,22 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
-  name: radar-backend
+  name: radar-backend-job
   namespace: radar-backend
   labels:
     app: radar-backend
     version: v1
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: radar-backend
   template:
     metadata:
       labels:
         app: radar-backend
         version: v1
     spec:
+      restartPolicy: OnFailure
       containers:
       - name: radar-backend
-        image: radar-backend:latest # Replace with your actual image name and tag
+        image: radar-backend:latest
         imagePullPolicy: Always
         env:
         # Configuration from ConfigMap
@@ -98,4 +95,3 @@ spec:
       - name: logs-volume
         persistentVolumeClaim:
           claimName: radar-backend-logs
-      restartPolicy: Always

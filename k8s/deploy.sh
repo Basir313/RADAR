@@ -59,6 +59,9 @@ print_status "Creating Secret..."
 kubectl apply -f secret.yaml
 
 # Create PVC
+print_status "Creating Persistent Volume..."
+kubectl apply -f pv.yaml
+
 print_status "Creating Persistent Volume Claim..."
 kubectl apply -f pvc.yaml
 
@@ -66,11 +69,7 @@ kubectl apply -f pvc.yaml
 print_status "Creating RBAC resources..."
 kubectl apply -f rbac.yaml
 
-# Create Service
-print_status "Creating Service..."
-kubectl apply -f service.yaml
-
-# Create Deployment
+# Create Deployment (no service needed for batch job)
 print_status "Creating Deployment..."
 kubectl apply -f deployment.yaml
 
