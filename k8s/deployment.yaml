@@ -20,7 +20,7 @@ spec:
       containers:
       - name: radar-backend
         image: radar-backend:latest # Replace with your actual image name and tag
-        imagePullPolicy: Always
+        imagePullPolicy: Never  # Use local image only
         env:
         # Configuration from ConfigMap
         - name: APP_NAME
