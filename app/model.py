@@ -275,7 +275,7 @@ def create_index_with_metadata(index_name: str, display_name: str, custom_metada
     metadata = {
         "display_name": display_name,
         "created_at": datetime.datetime.now().isoformat(),
-        "created_by": "SAP-Elastic-App",
+        "created_by": config.APP_NAME,
         "source": "SAP-HANA"
     }
     

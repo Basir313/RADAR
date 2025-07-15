@@ -87,8 +87,8 @@ def main():
     LOGGER.info("Logger initialized successfully")
 
     # Inizializzo Elasticsearch
-    model.init_elasticsearch()
     model.init_sap_hana()
+    model.init_elasticsearch()
 
     # Eseguo la query master su SAP HANA
     results = model.execute_master_query()

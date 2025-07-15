@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: radar-backend-ingress
+  namespace: radar-backend
+  labels:
+    app: radar-backend
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    # Add other annotations as needed for your ingress controller
+    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx # Adjust based on your ingress controller
+  rules:
+  - host: radar-backend.your-domain.com # Replace with your actual domain
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: radar-backend-service
+            port:
+              number: 80
+  # Uncomment if you want to enable TLS
+  # tls:
+  # - hosts:
+  #   - radar-backend.your-domain.com
+  #   secretName: radar-backend-tls

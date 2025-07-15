@@ -1,6 +1,6 @@
-# SAP-Elastic Integration Docker Setup
+# RADAR Backend Docker Setup
 
-This Docker setup allows you to run the SAP-Elastic integration application in a containerized environment.
+This Docker setup allows you to run the RADAR Backend application in a containerized environment.
 
 ## Files Created
 
@@ -63,7 +63,7 @@ Required environment variables (set in `.env` file):
 
 Optional environment variables:
 
-- `APP_NAME` - Application name (default: "SAP-Elastic Integration")
+- `APP_NAME` - Application name (default: "RADAR Backend")
 - `ENVIRONMENT` - Environment (default: "PRODUCTION")
 - `LOG_LEVEL` - Logging level (default: "INFO")
 
