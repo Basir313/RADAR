@@ -97,7 +97,7 @@ def main():
         # Elimino gli indici
         for index in result:
             try:
-                model.ELASTIC.delete_index(index)
+                model.delete_index(index)
                 LOGGER.info(f"Deleted index: {index}")
             except Exception as e:
                 LOGGER.error(f"Error deleting index {index}: {e}")        

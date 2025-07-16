@@ -423,3 +423,27 @@ def get_index_display_name(index_name: str) -> str:
     except Exception as e:
         LOGGER.error(f"Error getting display name for index {index_name}: {e}")
         return index_name
+
+
+def delete_index(index_name: str) -> None:
+    """Elimina un indice da Elasticsearch.
+    
+    Args:
+        index_name (str): Nome dell'indice da eliminare
+        
+    Raises:
+        ConnectionError: Se la connessione a Elasticsearch non è stata inizializzata.
+    """
+    
+    if not ELASTIC:
+        raise ConnectionError("Elasticsearch connection not initialized")
+    
+    try:
+        if ELASTIC.indices.exists(index=index_name):
+            ELASTIC.indices.delete(index=index_name)
+            LOGGER.info(f"Index {index_name} deleted successfully")
+        else:
+            LOGGER.warning(f"Index {index_name} does not exist, cannot delete")
+    except Exception as e:
+        LOGGER.error(f"Error deleting index {index_name}: {e}")
+        raise
