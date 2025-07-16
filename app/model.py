@@ -110,6 +110,7 @@ def execute_child_query(row: dict) -> tuple:
     assert query is not None, "U_KAI_FUNCTION cannot be None"
     
     LOGGER.info(f"Executing child query {query!r} for CODE: {code!r}, NAME: {name!r}")
+
     try:
         # Eseguo la query figlia
         results = SAP_HANA.execute(query)

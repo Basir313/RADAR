@@ -90,6 +90,21 @@ def main():
     model.init_sap_hana()
     model.init_elasticsearch()
 
+    if config.UPDATE_MODE == "FULL":
+        LOGGER.info("Running in FULL update mode")
+        # Ottengo tutti gli indici di Elasticsearch
+        result = model.list_indices_with_metadata()
+        # Elimino gli indici
+        for index in result:
+            try:
+                model.ELASTIC.delete_index(index)
+                LOGGER.info(f"Deleted index: {index}")
+            except Exception as e:
+                LOGGER.error(f"Error deleting index {index}: {e}")        
+    else:
+        LOGGER.info("Running in INCREMENTAL update mode")
+        # In modalità incrementale, non elimino gli indici esistenti
+
     # Eseguo la query master su SAP HANA
     results = model.execute_master_query()
     for row in results:
