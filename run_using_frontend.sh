@@ -153,7 +153,86 @@ monitor_container() {
     return 0
 }
 
-# Funzione principale
+# Funzione per fare il prune dei container radar-backend vecchi
+prune_old_containers() {
+    print_info "Controllo container radar-backend da eliminare (mantengo solo gli ultimi 20)..."
+    
+    # Ottieni tutti i container radar-backend (running e stopped) ordinati per data di creazione (più recenti prima)
+    local containers=$(docker ps -a --filter "ancestor=radar-backend:latest" --format "table {{.ID}}\t{{.Names}}\t{{.CreatedAt}}\t{{.Status}}" --no-trunc | grep -v "CONTAINER ID" | sort -k3 -r)
+    
+    if [ -z "$containers" ]; then
+        print_info "Nessun container radar-backend trovato"
+        return 0
+    fi
+    
+    # Conta i container totali
+    local total_containers=$(echo "$containers" | wc -l)
+    print_info "Trovati ${total_containers} container radar-backend totali"
+    
+    if [ $total_containers -le 20 ]; then
+        print_info "Numero di container (${total_containers}) <= 20, nessun prune necessario"
+        return 0
+    fi
+    
+    # Calcola quanti container eliminare
+    local containers_to_delete=$((total_containers - 20))
+    print_warning "Elimino i ${containers_to_delete} container più vecchi..."
+    
+    # Ottieni gli ID dei container da eliminare (gli ultimi nella lista ordinata)
+    local containers_to_remove=$(echo "$containers" | tail -n $containers_to_delete | awk '{print $1}')
+    
+    local deleted_count=0
+    local failed_count=0
+    
+    echo "$containers_to_remove" | while read -r container_id; do
+        if [ -n "$container_id" ]; then
+            local container_info=$(echo "$containers" | grep "$container_id" | head -n1)
+            local container_name=$(echo "$container_info" | awk '{print $2}')
+            local container_status=$(echo "$container_info" | awk '{print $4}')
+            
+            print_info "Eliminando container: ${container_name} (${container_id:0:12}) - Status: ${container_status}"
+            
+            if docker rm -f "$container_id" >/dev/null 2>&1; then
+                print_success "✓ Container ${container_name} eliminato"
+                ((deleted_count++))
+            else
+                print_error "✗ Errore nell'eliminazione del container ${container_name}"
+                ((failed_count++))
+            fi
+        fi
+    done
+    
+    # Mostra statistiche finali usando subshell per leggere le variabili
+    local final_count=$(docker ps -a --filter "ancestor=radar-backend:latest" --format "{{.ID}}" | wc -l)
+    print_success "Prune completato. Container rimanenti: ${final_count}"
+    
+    if [ $failed_count -gt 0 ]; then
+        print_warning "Alcuni container non sono stati eliminati (${failed_count} fallimenti)"
+    fi
+}
+
+# Funzione per fare il prune anche delle immagini dangling (opzionale)
+prune_dangling_images() {
+    print_info "Controllo immagini dangling da eliminare..."
+    
+    local dangling_images=$(docker images -f "dangling=true" -q)
+    
+    if [ -z "$dangling_images" ]; then
+        print_info "Nessuna immagine dangling trovata"
+        return 0
+    fi
+    
+    local image_count=$(echo "$dangling_images" | wc -l)
+    print_info "Trovate ${image_count} immagini dangling, le elimino..."
+    
+    if docker rmi $dangling_images >/dev/null 2>&1; then
+        print_success "✓ ${image_count} immagini dangling eliminate"
+    else
+        print_warning "Alcune immagini dangling non sono state eliminate"
+    fi
+}
+
+# Modifica la funzione principale per includere il prune
 main() {
     echo "=================================================="
     echo "   Avvio Container RADAR Backend - INCREMENTALE"
@@ -169,6 +248,18 @@ main() {
     if ! command -v jq &> /dev/null; then
         print_warning "jq non trovato. L'output JSON potrebbe non essere formattato correttamente."
     fi
+    
+    # Verifica che Docker sia disponibile
+    if ! command -v docker &> /dev/null; then
+        print_error "Docker non trovato. Installa Docker per continuare."
+        exit 1
+    fi
+    
+    # Fai il prune dei container vecchi PRIMA di avviare il nuovo
+    prune_old_containers
+    
+    # Opzionalmente, pulisci anche le immagini dangling
+    prune_dangling_images
     
     # Verifica che il frontend sia raggiungibile
     check_frontend
